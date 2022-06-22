@@ -55,15 +55,16 @@ public class MainPanel extends JPanel {
                 String nameInFormat = changeNameToFormat();
 
                 this.filteredImage = null;
-                if (!this.isSearchClickedBefore) {
-                    this.driver = new ChromeDriver(options);
-                }
 
+                this.driver = new ChromeDriver(options);
                 this.driver.get(Constants.FACEBOOK_ADDRESS + nameInFormat);
 
-                findImageURL();
-                this.isSearchClickedBefore = true;
-                repaint();
+                if (isFindImageURL()){
+                    this.isSearchClickedBefore = true;
+                    repaint();
+                }
+                this.driver.close();
+
             }
         }));
 
@@ -79,12 +80,12 @@ public class MainPanel extends JPanel {
         if (this.isSearchClickedBefore) {
             try {
                 url = new URL(this.urlImageLinkPath);
-                imageForFiltering = ImageIO.read(url);
+                this.imageForFiltering = ImageIO.read(url);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            leftImageIcon = new ImageIcon(imageForFiltering);
+            leftImageIcon = new ImageIcon(this.imageForFiltering);
             resizeImage(leftImageIcon);
             leftImageIcon.paintIcon(this, g, Constants.X_IMAGE, Constants.Y_IMAGE);
 
@@ -188,44 +189,40 @@ public class MainPanel extends JPanel {
         return nameInFormat;
     }
 
-    private void findImageURL() {
-        WebElement profileCircle = null;
-        boolean isProfileCircleExist = false;
+    private boolean isFindImageURL() {
+
+        WebElement facebookElement = null;
         do {
             try {
-                profileCircle = this.driver.findElement(By.cssSelector("a[class=\"oajrlxb2 gs1a9yip g5ia77u1 mtkw9kbi tlpljxtp qensuy8j ppp5ayq2 goun2846 ccm00jje s44p3ltw mk2mc5f4 rt8b4zig n8ej3o3l agehan2d sk4xxmp2 rq0escxv nhd2j8a9 mg4g778l pfnyh3mw p7hjln8o kvgmc6g5 cxmmr5t8 oygrvhab hcukyx3x tgvbjcpo hpfvmrgz jb3vyjys rz4wbd8a qt6c0cv9 a8nywdso l9j0dhe7 i1ao9s8h esuyzwwr f1sip0of du4w35lb n00je7tq arfg74bv qs9ysxi8 k77z8yql btwxx1t3 abiwlrkh p8dawk7l lzcic4wl oo9gr5id q9uorilb\"]"));
-                isProfileCircleExist = true;
+                facebookElement = this.driver.findElement(By.className("p361ku9c"));
             } catch (NoSuchElementException exception) {
             }
-        } while (!isProfileCircleExist);
+        } while (facebookElement == null);
 
-        String currentUrl = this.driver.getCurrentUrl();
 
-        this.driver.get(profileCircle.getAttribute("href"));
+        WebElement profileCircle = null;
+        try {
+            profileCircle = this.driver.findElement(By.cssSelector("a[class=\"oajrlxb2 gs1a9yip g5ia77u1 mtkw9kbi tlpljxtp qensuy8j ppp5ayq2 goun2846 ccm00jje s44p3ltw mk2mc5f4 rt8b4zig n8ej3o3l agehan2d sk4xxmp2 rq0escxv nhd2j8a9 mg4g778l pfnyh3mw p7hjln8o kvgmc6g5 cxmmr5t8 oygrvhab hcukyx3x tgvbjcpo hpfvmrgz jb3vyjys rz4wbd8a qt6c0cv9 a8nywdso l9j0dhe7 i1ao9s8h esuyzwwr f1sip0of du4w35lb n00je7tq arfg74bv qs9ysxi8 k77z8yql btwxx1t3 abiwlrkh p8dawk7l lzcic4wl oo9gr5id q9uorilb\"]"));
+        } catch (NoSuchElementException exception) {
 
-        WebElement imageLink = null;
-        boolean isImageLinkExist = false;
-        if (currentUrl.equals(this.driver.getCurrentUrl())) {
-            do {
-                try {
-                    List<WebElement> profileElements = this.driver.findElements(By.cssSelector("image[preserveAspectRatio=\"xMidYMid slice\"]"));
-                    imageLink = profileElements.get(1);
-                    isImageLinkExist = true;
-                } catch (NoSuchElementException exception) {
-                }
-            } while (!isImageLinkExist);
-            this.urlImageLinkPath = imageLink.getAttribute("xlink:href");
-        } else {
-            do {
-                try {
-                    imageLink = this.driver.findElement(By.cssSelector("img[class=\"gitj76qy d2edcug0 r9f5tntg r0294ipz\"]"));
-                    isImageLinkExist = true;
-                } catch (NoSuchElementException exception) {
-                }
-            } while (!isImageLinkExist);
-            this.urlImageLinkPath = imageLink.getAttribute("src");
         }
+
+        if (profileCircle != null){
+
+            WebElement imageLink = null;
+            try {
+                List<WebElement> profileElements = this.driver.findElements(By.cssSelector("image[preserveAspectRatio=\"xMidYMid slice\"]"));
+                imageLink = profileElements.get(1);
+            } catch (NoSuchElementException exception) {
+
+            }
+            this.urlImageLinkPath = imageLink.getAttribute("xlink:href");
+            return true;
+        }
+        return false;
     }
+
+
 
     private void colorShiftRightOrLeft(boolean isRight) {
         if (this.imageForFiltering != null) {
