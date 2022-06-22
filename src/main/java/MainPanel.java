@@ -208,15 +208,26 @@ public class MainPanel extends JPanel {
         }
 
         if (profileCircle != null){
+//            String currentUrl = this.driver.getCurrentUrl();
+
+//            this.driver.get(profileCircle.getAttribute("href"));
 
             WebElement imageLink = null;
-            try {
-                List<WebElement> profileElements = this.driver.findElements(By.cssSelector("image[preserveAspectRatio=\"xMidYMid slice\"]"));
-                imageLink = profileElements.get(1);
-            } catch (NoSuchElementException exception) {
+//            if (currentUrl.equals(this.driver.getCurrentUrl())) {
+                try {
+                    List<WebElement> profileElements = this.driver.findElements(By.cssSelector("image[preserveAspectRatio=\"xMidYMid slice\"]"));
+                    imageLink = profileElements.get(1);
+                } catch (NoSuchElementException exception) {
 
-            }
-            this.urlImageLinkPath = imageLink.getAttribute("xlink:href");
+                }
+                this.urlImageLinkPath = imageLink.getAttribute("xlink:href");
+//            } else {
+//                try {
+//                    imageLink = this.driver.findElement(By.cssSelector("img[class=\"gitj76qy d2edcug0 r9f5tntg r0294ipz\"]"));
+//                } catch (NoSuchElementException exception) {
+//                }
+//                this.urlImageLinkPath = imageLink.getAttribute("src");
+//            }
             return true;
         }
         return false;
